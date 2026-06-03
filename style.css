@@ -749,13 +749,17 @@ body {
   background: var(--income-bg);
 }
 
-.category-chip i { font-size: 18px; }
+.category-chip i {
+  font-size: 18px;
+  pointer-events: none;
+}
 
 .category-chip span {
   font-size: 10px;
   font-weight: 600;
   text-align: center;
   line-height: 1.2;
+  pointer-events: none;
 }
 
 /* ============ REPORTS ============ */
@@ -860,6 +864,14 @@ body {
   .balance-card .value { font-size: 20px; }
   .balance-card .label { font-size: 11px; }
   .balance-card { padding: 18px 14px; }
+}
+
+/* ============ MOBILE TOUCH FIX ============ */
+.alert-item *, .transaction-item *, .goal-card *, .filter-chip * {
+  pointer-events: none;
+}
+.alert-item, .transaction-item, .goal-card, .filter-chip {
+  pointer-events: auto;
 }
 
 /* ============ SCROLLBAR ============ */
