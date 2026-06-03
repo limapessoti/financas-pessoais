@@ -679,6 +679,15 @@ function resetAllData() {
   showToast('Dados restaurados!');
 }
 
+function clearAllData() {
+  if (!confirm('Isso vai APAGAR todas as transações e metas. Começar do zero?')) return;
+  state.transactions = [];
+  state.goals = [];
+  saveData();
+  navigateTo('dashboard');
+  showToast('Tudo limpo! Comece do zero.');
+}
+
 // ---- INIT ----
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
