@@ -582,16 +582,24 @@ function updateTypeToggle(type) {
 function renderCategorySelector(prefix, type) {
   const container = document.getElementById(prefix + '-category-selector');
   const cats = type === 'income' ? CATEGORIES.income : CATEGORIES.expense;
-  container.innerHTML = cats.map(c => `<div class="category-chip" data-cat="${c.id}" onclick="selectCategory('${c.id}')"><i class="fa-solid ${c.icon}" style="color:${c.color}"></i><span>${c.name}</span></div>`).join('');
+  container.innerHTML = cats.map(c => `<div class="category-chip" data-cat="${c.id}" data-prefix="${prefix}" onclick="selectCategory('${c.id}','${prefix}')"><i class="fa-solid ${c.icon}" style="color:${c.color}"></i><span>${c.name}</span></div>`).join('');
 }
 
-function selectCategory(catId) {
-  document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('selected'));
-  if (catId) { const el = document.querySelector(`.category-chip[data-cat="${catId}"]`); if (el) el.classList.add('selected'); }
-  const txCat = document.getElementById('tx-category');
-  const recCat = document.getElementById('rec-category');
-  if (txCat) txCat.value = catId || '';
-  if (recCat) recCat.value = catId || '';
+function selectCategory(catId, prefix) {
+  // Detectar qual modal está aberto se prefix não foi passado
+  if (!prefix) {
+    const recModal = document.getElementById('recurring-modal');
+    prefix = (recModal && recModal.classList.contains('active')) ? 'rec' : 'tx';
+  }
+  // Limpar seleção apenas no grid correto
+  const container = document.getElementById(prefix + '-category-selector');
+  if (container) {
+    container.querySelectorAll('.category-chip').forEach(c => c.classList.remove('selected'));
+    if (catId) { const el = container.querySelector(`.category-chip[data-cat="${catId}"]`); if (el) el.classList.add('selected'); }
+  }
+  // Atualizar o campo hidden correto
+  const hiddenField = document.getElementById(prefix === 'rec' ? 'rec-category' : 'tx-category');
+  if (hiddenField) hiddenField.value = catId || '';
 }
 
 function saveTransaction() {
