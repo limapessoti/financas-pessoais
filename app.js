@@ -1,9 +1,31 @@
 // =====================================================
-// FINANÇAS PESSOAIS - Aplicativo Principal v2
+// FINANÇAS PESSOAIS - Aplicativo Principal v3 (Firebase)
 // =====================================================
 
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const STORAGE_KEY = 'financas_app_data';
+const FIREBASE_DOC = 'familia_principal';
+
+// ---- FIREBASE INIT ----
+const firebaseConfig = {
+  apiKey: "AIzaSyDH1YgNc3vLLFse-IKchebC4d5BprFo2b8",
+  authDomain: "financas-pessoais-690cd.firebaseapp.com",
+  projectId: "financas-pessoais-690cd",
+  storageBucket: "financas-pessoais-690cd.firebasestorage.app",
+  messagingSenderId: "481053677771",
+  appId: "1:481053677771:web:51c951af94019cf72be34e"
+};
+
+let db = null;
+let unsubscribe = null;
+let isSyncing = false;
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+} catch (e) {
+  console.warn('Firebase não disponível, usando localStorage apenas.', e);
+}
 
 let state = {
   currentMonth: new Date().getMonth(),
@@ -21,8 +43,25 @@ let state = {
 let barChart = null;
 let pieChart = null;
 
-// ---- PERSISTENCE ----
+// ---- SYNC STATUS INDICATOR ----
+function setSyncStatus(status) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  if (status === 'syncing') {
+    el.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" style="color:#FFC107"></i>';
+    el.title = 'Sincronizando...';
+  } else if (status === 'synced') {
+    el.innerHTML = '<i class="fa-solid fa-cloud" style="color:#66BB6A"></i>';
+    el.title = 'Sincronizado';
+  } else if (status === 'offline') {
+    el.innerHTML = '<i class="fa-solid fa-cloud-xmark" style="color:#EF5350"></i>';
+    el.title = 'Offline - dados locais';
+  }
+}
+
+// ---- PERSISTENCE (localStorage + Firebase) ----
 function loadData() {
+  // Load from localStorage first (instant)
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     const parsed = JSON.parse(saved);
@@ -33,16 +72,81 @@ function loadData() {
     state.transactions = [];
     state.recurring = [...DEFAULT_RECURRING];
     state.goals = [...DEFAULT_GOALS];
-    saveData();
+  }
+
+  // Then start Firebase real-time listener
+  if (db) {
+    startRealtimeSync();
+  } else {
+    setSyncStatus('offline');
   }
 }
 
 function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+  // Always save to localStorage (instant)
+  const data = {
     transactions: state.transactions,
     recurring: state.recurring,
     goals: state.goals,
-  }));
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+  // Also save to Firebase (async)
+  if (db) {
+    setSyncStatus('syncing');
+    isSyncing = true;
+    db.collection('dados').doc(FIREBASE_DOC).set({
+      ...data,
+      lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      setSyncStatus('synced');
+      isSyncing = false;
+    }).catch(err => {
+      console.warn('Erro ao salvar no Firebase:', err);
+      setSyncStatus('offline');
+      isSyncing = false;
+    });
+  }
+}
+
+function startRealtimeSync() {
+  if (!db) return;
+
+  // Listen for changes from other devices
+  unsubscribe = db.collection('dados').doc(FIREBASE_DOC)
+    .onSnapshot(doc => {
+      if (isSyncing) return; // Ignore our own writes
+
+      if (doc.exists) {
+        const data = doc.data();
+        const remoteTs = data.lastUpdated ? data.lastUpdated.toMillis() : 0;
+        const localData = localStorage.getItem(STORAGE_KEY);
+        const localTs = localData ? (JSON.parse(localData)._savedAt || 0) : 0;
+
+        // Update local state from Firebase
+        state.transactions = data.transactions || [];
+        state.recurring = data.recurring || [];
+        state.goals = data.goals || [];
+
+        // Update localStorage cache
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          transactions: state.transactions,
+          recurring: state.recurring,
+          goals: state.goals,
+          _savedAt: Date.now()
+        }));
+
+        // Re-render current page
+        navigateTo(state.currentPage);
+        setSyncStatus('synced');
+      } else {
+        // No data in Firebase yet, push local data
+        saveData();
+      }
+    }, err => {
+      console.warn('Erro no listener Firebase:', err);
+      setSyncStatus('offline');
+    });
 }
 
 // ---- FORMATTERS ----
