@@ -42,6 +42,7 @@ let state = {
 
 let barChart = null;
 let pieChart = null;
+let respChart = null;
 
 // ---- SYNC STATUS INDICATOR ----
 function setSyncStatus(status) {
@@ -478,9 +479,83 @@ function renderGoals() {
 
 // ---- RENDER: REPORTS ----
 function renderReports() {
+  renderResponsibleChart();
+  renderYearSummary();
+  renderMonthComparison();
+}
+
+function renderResponsibleChart() {
+  const ctx = document.getElementById('responsibleChart');
+  const detail = document.getElementById('responsible-detail');
+  const label = document.getElementById('resp-month-label');
+  if (!ctx || !detail) return;
+
+  label.textContent = `${MONTHS[state.currentMonth]} ${state.currentYear}`;
+  const txs = getMonthTransactions(state.currentMonth, state.currentYear);
+
+  // Agrupar por responsável
+  const grouped = {};
+  txs.forEach(t => {
+    const resp = t.responsible || 'Sem responsável';
+    if (!grouped[resp]) grouped[resp] = { income: 0, expense: 0 };
+    if (t.type === 'income') grouped[resp].income += t.amount;
+    else grouped[resp].expense += t.amount;
+  });
+
+  const labels = Object.keys(grouped);
+  const incomeData = labels.map(l => grouped[l].income);
+  const expenseData = labels.map(l => grouped[l].expense);
+
+  if (respChart) respChart.destroy();
+
+  if (labels.length === 0) {
+    respChart = new Chart(ctx, { type: 'bar', data: { labels: ['Sem dados'], datasets: [{ data: [0], backgroundColor: '#E0E0E0' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } } });
+    detail.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:16px;">Sem lançamentos neste mês</p>';
+    return;
+  }
+
+  respChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Receitas', data: incomeData, backgroundColor: '#66BB6A', borderRadius: 6, barPercentage: 0.4 },
+        { label: 'Despesas', data: expenseData, backgroundColor: '#EF5350', borderRadius: 6, barPercentage: 0.4 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 16, font: { size: 11, weight: '600' } } },
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}` } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } },
+        y: { grid: { color: '#F0F0F0' }, ticks: { font: { size: 10 }, callback: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : v } }
+      }
+    }
+  });
+
+  // Detalhamento por responsável
+  detail.innerHTML = labels.map(resp => {
+    const d = grouped[resp];
+    const saldo = d.income - d.expense;
+    const pos = saldo >= 0;
+    return `
+      <div class="report-row" style="flex-wrap:wrap;gap:4px;">
+        <div class="cat-info" style="min-width:100%;margin-bottom:2px;"><div class="cat-dot" style="background:var(--primary)"></div><div class="cat-name" style="font-weight:700">${resp}</div></div>
+        <div style="display:flex;justify-content:space-between;width:100%;padding-left:20px;font-size:13px;">
+          <span style="color:var(--income)">Receita: ${formatCurrency(d.income)}</span>
+          <span style="color:var(--expense)">Despesa: ${formatCurrency(d.expense)}</span>
+          <span style="color:${pos ? 'var(--income)' : 'var(--expense)'}; font-weight:700">Saldo: ${formatCurrency(saldo)}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderYearSummary() {
   const c1 = document.getElementById('year-summary');
-  const c2 = document.getElementById('month-comparison');
-  if (!c1 || !c2) return;
+  if (!c1) return;
 
   let totalIncome = 0, totalExpense = 0;
   for (let m = 0; m < 12; m++) { const s = getMonthSummary(m, state.currentYear); totalIncome += s.income; totalExpense += s.expense; }
@@ -488,6 +563,11 @@ function renderReports() {
     <div class="report-row"><div class="cat-info"><div class="cat-dot" style="background:var(--income)"></div><div class="cat-name">Total Receitas ${state.currentYear}</div></div><div class="cat-value" style="color:var(--income)">${formatCurrency(totalIncome)}</div></div>
     <div class="report-row"><div class="cat-info"><div class="cat-dot" style="background:var(--expense)"></div><div class="cat-name">Total Despesas ${state.currentYear}</div></div><div class="cat-value" style="color:var(--expense)">${formatCurrency(totalExpense)}</div></div>
     <div class="report-row"><div class="cat-info"><div class="cat-dot" style="background:var(--primary)"></div><div class="cat-name">Saldo do Ano</div></div><div class="cat-value" style="color:var(--primary)">${formatCurrency(totalIncome - totalExpense)}</div></div>`;
+}
+
+function renderMonthComparison() {
+  const c2 = document.getElementById('month-comparison');
+  if (!c2) return;
 
   let html = '';
   for (let m = 0; m < 12; m++) {
