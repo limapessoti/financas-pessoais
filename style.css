@@ -492,6 +492,7 @@ body {
   justify-content: space-around;
   z-index: 200;
   padding-bottom: env(safe-area-inset-bottom, 0);
+  overflow: hidden;
 }
 
 .nav-item {
