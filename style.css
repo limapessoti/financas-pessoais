@@ -363,6 +363,48 @@ body {
 .transaction-status.pending { background: #FF9800; }
 .transaction-status.overdue { background: var(--expense); }
 
+/* ============ RECURRING ============ */
+.recurring-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  padding: 0 var(--content-pad) 12px;
+}
+
+.rec-sum-item {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 12px 8px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.rec-sum-item span {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.rec-sum-item.income strong { color: var(--income); }
+.rec-sum-item.expense strong { color: var(--expense); }
+.rec-sum-item.positive strong { color: var(--primary); }
+.rec-sum-item.negative strong { color: var(--expense); }
+.rec-sum-item strong { font-size: 14px; }
+
+.rec-section-title {
+  padding: 16px var(--content-pad) 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* ============ GOALS ============ */
 .goals-list { padding: 0 var(--content-pad); }
 

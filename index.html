@@ -17,23 +17,20 @@
 <body>
 <div class="app-container">
 
-  <!-- ======= HEADER ======= -->
   <header class="app-header">
     <div class="header-top">
       <h1><i class="fa-solid fa-wallet"></i> Finanças</h1>
       <div class="header-actions">
         <button onclick="clearAllData()" title="Limpar tudo"><i class="fa-solid fa-trash-can"></i></button>
-        <button onclick="resetAllData()" title="Restaurar dados da planilha"><i class="fa-solid fa-rotate-left"></i></button>
       </div>
     </div>
     <div class="month-selector">
       <button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-      <span id="month-label">Junho 2025</span>
+      <span id="month-label">Junho 2026</span>
       <button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
   </header>
 
-  <!-- ======= BALANCE STRIP ======= -->
   <div class="balance-wrapper">
     <div class="balance-strip">
       <div class="balance-card income">
@@ -51,44 +48,19 @@
     </div>
   </div>
 
-  <!-- ============================================ -->
-  <!-- PAGE: DASHBOARD                              -->
-  <!-- ============================================ -->
+  <!-- PAGE: DASHBOARD -->
   <div id="page-dashboard" class="page active">
-
-    <div class="section-title">
-      <span><i class="fa-solid fa-chart-simple"></i> Evolução Mensal</span>
-    </div>
-    <div class="chart-container">
-      <div class="chart-wrapper">
-        <canvas id="barChart"></canvas>
-      </div>
-    </div>
-
-    <div class="section-title">
-      <span><i class="fa-solid fa-chart-pie"></i> Despesas por Categoria</span>
-    </div>
-    <div class="chart-container">
-      <div class="chart-wrapper pie-chart">
-        <canvas id="pieChart"></canvas>
-      </div>
-    </div>
-
-    <div class="section-title">
-      <span><i class="fa-solid fa-bell"></i> Contas a Vencer</span>
-      <button class="see-all" onclick="navigateTo('transactions')">Ver todas</button>
-    </div>
+    <div class="section-title"><span><i class="fa-solid fa-chart-simple"></i> Evolução Mensal</span></div>
+    <div class="chart-container"><div class="chart-wrapper"><canvas id="barChart"></canvas></div></div>
+    <div class="section-title"><span><i class="fa-solid fa-chart-pie"></i> Despesas por Categoria</span></div>
+    <div class="chart-container"><div class="chart-wrapper pie-chart"><canvas id="pieChart"></canvas></div></div>
+    <div class="section-title"><span><i class="fa-solid fa-bell"></i> Contas a Vencer</span><button class="see-all" onclick="navigateTo('transactions')">Ver todas</button></div>
     <div class="alerts-list" id="alerts-container"></div>
-
-    <div class="section-title">
-      <span><i class="fa-solid fa-list"></i> Detalhamento</span>
-    </div>
+    <div class="section-title"><span><i class="fa-solid fa-list"></i> Detalhamento</span></div>
     <div class="report-card" id="category-breakdown"></div>
   </div>
 
-  <!-- ============================================ -->
-  <!-- PAGE: TRANSACTIONS                           -->
-  <!-- ============================================ -->
+  <!-- PAGE: TRANSACTIONS -->
   <div id="page-transactions" class="page">
     <div class="transactions-filters">
       <div class="filter-chip active" data-filter="all">Todos</div>
@@ -98,56 +70,44 @@
     <div id="transactions-list"></div>
   </div>
 
-  <!-- ============================================ -->
-  <!-- PAGE: GOALS                                  -->
-  <!-- ============================================ -->
-  <div id="page-goals" class="page">
+  <!-- PAGE: RECURRING -->
+  <div id="page-recurring" class="page">
     <div class="section-title">
-      <span><i class="fa-solid fa-bullseye"></i> Minhas Metas</span>
-      <button class="see-all" onclick="openAddGoal()"><i class="fa-solid fa-plus"></i> Nova Meta</button>
+      <span><i class="fa-solid fa-repeat"></i> Lançamentos Recorrentes</span>
+      <button class="see-all" onclick="openAddRecurring()"><i class="fa-solid fa-plus"></i> Novo</button>
     </div>
+    <div id="recurring-list"></div>
+    <div style="padding:16px;">
+      <button class="btn-primary" onclick="generateCurrentMonth()">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Lançamentos do Mês
+      </button>
+    </div>
+  </div>
+
+  <!-- PAGE: GOALS -->
+  <div id="page-goals" class="page">
+    <div class="section-title"><span><i class="fa-solid fa-bullseye"></i> Minhas Metas</span><button class="see-all" onclick="openAddGoal()"><i class="fa-solid fa-plus"></i> Nova Meta</button></div>
     <div class="goals-list" id="goals-list"></div>
   </div>
 
-  <!-- ============================================ -->
-  <!-- PAGE: REPORTS                                -->
-  <!-- ============================================ -->
+  <!-- PAGE: REPORTS -->
   <div id="page-reports" class="page">
-    <div class="section-title">
-      <span><i class="fa-solid fa-calendar"></i> Resumo Anual</span>
-    </div>
+    <div class="section-title"><span><i class="fa-solid fa-calendar"></i> Resumo Anual</span></div>
     <div class="report-card" id="year-summary"></div>
-
-    <div class="section-title">
-      <span><i class="fa-solid fa-chart-bar"></i> Saldo por Mês</span>
-    </div>
+    <div class="section-title"><span><i class="fa-solid fa-chart-bar"></i> Saldo por Mês</span></div>
     <div class="report-card" id="month-comparison"></div>
   </div>
 
-  <!-- ======= BOTTOM NAV ======= -->
+  <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
-    <button class="nav-item active" data-page="dashboard">
-      <i class="fa-solid fa-home"></i>
-      <span>Início</span>
-    </button>
-    <button class="nav-item" data-page="transactions">
-      <i class="fa-solid fa-list"></i>
-      <span>Transações</span>
-    </button>
-    <button class="nav-item add-btn" onclick="openAddTransaction()">
-      <div class="add-circle"><i class="fa-solid fa-plus"></i></div>
-    </button>
-    <button class="nav-item" data-page="goals">
-      <i class="fa-solid fa-bullseye"></i>
-      <span>Metas</span>
-    </button>
-    <button class="nav-item" data-page="reports">
-      <i class="fa-solid fa-chart-line"></i>
-      <span>Relatórios</span>
-    </button>
+    <button class="nav-item active" data-page="dashboard"><i class="fa-solid fa-home"></i><span>Início</span></button>
+    <button class="nav-item" data-page="transactions"><i class="fa-solid fa-list"></i><span>Transações</span></button>
+    <button class="nav-item add-btn" onclick="openAddTransaction()"><div class="add-circle"><i class="fa-solid fa-plus"></i></div></button>
+    <button class="nav-item" data-page="recurring"><i class="fa-solid fa-repeat"></i><span>Recorrentes</span></button>
+    <button class="nav-item" data-page="reports"><i class="fa-solid fa-chart-line"></i><span>Relatórios</span></button>
   </nav>
 
-  <!-- ======= MODAL: TRANSACTION ======= -->
+  <!-- MODAL: TRANSACTION -->
   <div class="modal-overlay" id="transaction-modal">
     <div class="modal">
       <div class="modal-header">
@@ -157,68 +117,57 @@
       <div class="modal-body">
         <input type="hidden" id="tx-type" value="expense">
         <input type="hidden" id="tx-category" value="">
-
         <div class="type-toggle">
-          <button id="btn-type-income" onclick="updateTypeToggle('income')">
-            <i class="fa-solid fa-arrow-up"></i> Receita
-          </button>
-          <button id="btn-type-expense" class="active-expense" onclick="updateTypeToggle('expense')">
-            <i class="fa-solid fa-arrow-down"></i> Despesa
-          </button>
+          <button id="btn-type-income" onclick="updateTypeToggle('income')"><i class="fa-solid fa-arrow-up"></i> Receita</button>
+          <button id="btn-type-expense" class="active-expense" onclick="updateTypeToggle('expense')"><i class="fa-solid fa-arrow-down"></i> Despesa</button>
         </div>
-
-        <div class="form-group">
-          <label>Categoria</label>
-          <div class="category-grid" id="category-selector"></div>
-        </div>
-
-        <div class="form-group">
-          <label>Descrição *</label>
-          <input type="text" id="tx-description" placeholder="Ex: Salário, Aluguel...">
-        </div>
-
+        <div class="form-group"><label>Categoria</label><div class="category-grid" id="tx-category-selector"></div></div>
+        <div class="form-group"><label>Descrição *</label><input type="text" id="tx-description" placeholder="Ex: Salário, Aluguel..."></div>
         <div class="form-row">
-          <div class="form-group">
-            <label>Valor *</label>
-            <input type="number" id="tx-amount" placeholder="0,00" step="0.01" min="0">
-          </div>
-          <div class="form-group">
-            <label>Data *</label>
-            <input type="date" id="tx-date">
-          </div>
+          <div class="form-group"><label>Valor *</label><input type="number" id="tx-amount" placeholder="0,00" step="0.01" min="0"></div>
+          <div class="form-group"><label>Data *</label><input type="date" id="tx-date"></div>
         </div>
-
-        <div class="form-group">
-          <label>Responsável</label>
-          <select id="tx-responsible">
-            <option value="">Selecione</option>
-            <option value="Geiza">Geiza</option>
-            <option value="Elen">Elen</option>
-          </select>
-        </div>
-
         <div class="form-row">
-          <div class="form-check">
-            <input type="checkbox" id="tx-recurring">
-            <label for="tx-recurring">Recorrente</label>
-          </div>
-          <div class="form-check">
-            <input type="checkbox" id="tx-paid">
-            <label for="tx-paid">Pago</label>
-          </div>
+          <div class="form-group"><label>Responsável</label><select id="tx-responsible"><option value="">Selecione</option><option value="Geiza">Geiza</option><option value="Elen">Elen</option></select></div>
+          <div class="form-check" style="align-self:end"><input type="checkbox" id="tx-paid"><label for="tx-paid">Pago</label></div>
         </div>
-
-        <button class="btn-primary" onclick="saveTransaction()">
-          <i class="fa-solid fa-check"></i> Salvar
-        </button>
-        <button class="btn-delete" id="btn-delete-tx" style="display:none" onclick="deleteTransaction()">
-          <i class="fa-solid fa-trash"></i> Excluir Transação
-        </button>
+        <button class="btn-primary" onclick="saveTransaction()"><i class="fa-solid fa-check"></i> Salvar</button>
+        <button class="btn-delete" id="btn-delete-tx" style="display:none" onclick="deleteTransaction()"><i class="fa-solid fa-trash"></i> Excluir</button>
       </div>
     </div>
   </div>
 
-  <!-- ======= MODAL: GOAL ======= -->
+  <!-- MODAL: RECURRING -->
+  <div class="modal-overlay" id="recurring-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="rec-modal-title">Novo Recorrente</h2>
+        <button onclick="closeModal('recurring-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="rec-type" value="expense">
+        <input type="hidden" id="rec-category" value="">
+        <div class="type-toggle">
+          <button id="btn-rec-type-income" onclick="updateRecTypeToggle('income')"><i class="fa-solid fa-arrow-up"></i> Receita</button>
+          <button id="btn-rec-type-expense" class="active-expense" onclick="updateRecTypeToggle('expense')"><i class="fa-solid fa-arrow-down"></i> Despesa</button>
+        </div>
+        <div class="form-group"><label>Categoria</label><div class="category-grid" id="rec-category-selector"></div></div>
+        <div class="form-group"><label>Descrição *</label><input type="text" id="rec-description" placeholder="Ex: Financiamento Casa..."></div>
+        <div class="form-row">
+          <div class="form-group"><label>Valor *</label><input type="number" id="rec-amount" placeholder="0,00" step="0.01" min="0"></div>
+          <div class="form-group"><label>Dia do Vencimento *</label><input type="number" id="rec-due-day" min="1" max="31" value="1"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Responsável</label><select id="rec-responsible"><option value="">Selecione</option><option value="Geiza">Geiza</option><option value="Elen">Elen</option></select></div>
+          <div class="form-group"><label>Até quando? (opcional)</label><input type="month" id="rec-end-month"></div>
+        </div>
+        <button class="btn-primary" onclick="saveRecurring()"><i class="fa-solid fa-check"></i> Salvar Recorrente</button>
+        <button class="btn-delete" id="btn-delete-rec" style="display:none" onclick="deleteRecurring()"><i class="fa-solid fa-trash"></i> Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GOAL -->
   <div class="modal-overlay" id="goal-modal">
     <div class="modal">
       <div class="modal-header">
@@ -226,40 +175,21 @@
         <button onclick="closeModal('goal-modal')"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Nome da Meta *</label>
-          <input type="text" id="goal-name" placeholder="Ex: Reserva de Emergência">
-        </div>
+        <div class="form-group"><label>Nome da Meta *</label><input type="text" id="goal-name" placeholder="Ex: Reserva de Emergência"></div>
         <div class="form-row">
-          <div class="form-group">
-            <label>Valor Alvo *</label>
-            <input type="number" id="goal-target" placeholder="0,00" step="0.01" min="0">
-          </div>
-          <div class="form-group">
-            <label>Valor Atual</label>
-            <input type="number" id="goal-current" placeholder="0,00" step="0.01" min="0" value="0">
-          </div>
+          <div class="form-group"><label>Valor Alvo *</label><input type="number" id="goal-target" placeholder="0,00" step="0.01" min="0"></div>
+          <div class="form-group"><label>Valor Atual</label><input type="number" id="goal-current" placeholder="0,00" step="0.01" min="0" value="0"></div>
         </div>
-        <div class="form-group">
-          <label>Prazo</label>
-          <input type="date" id="goal-deadline">
-        </div>
-        <button class="btn-primary" onclick="saveGoal()">
-          <i class="fa-solid fa-check"></i> Salvar Meta
-        </button>
-        <button class="btn-delete" id="btn-delete-goal" style="display:none" onclick="deleteGoal()">
-          <i class="fa-solid fa-trash"></i> Excluir Meta
-        </button>
+        <div class="form-group"><label>Prazo</label><input type="date" id="goal-deadline"></div>
+        <button class="btn-primary" onclick="saveGoal()"><i class="fa-solid fa-check"></i> Salvar Meta</button>
+        <button class="btn-delete" id="btn-delete-goal" style="display:none" onclick="deleteGoal()"><i class="fa-solid fa-trash"></i> Excluir Meta</button>
       </div>
     </div>
   </div>
 
-  <!-- ======= TOAST ======= -->
   <div class="toast" id="toast"></div>
+</div>
 
-</div><!-- /.app-container -->
-
-  <!-- ======= SCRIPTS ======= -->
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
