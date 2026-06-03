@@ -574,22 +574,45 @@ function saveRecurring() {
   const startMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
   if (state.editingRecurring) {
+    const recId = state.editingRecurring.id;
     Object.assign(state.editingRecurring, { type, description, amount, dueDay, category, responsible, endMonth });
-    showToast('Recorrente atualizado!');
+
+    // Propagar alterações para transações já geradas (não pagas)
+    let updated = 0;
+    state.transactions.forEach(t => {
+      if (t.recurringId === recId && !t.paid) {
+        t.type = type;
+        t.description = description;
+        t.amount = amount;
+        t.category = category;
+        t.responsible = responsible;
+        // Atualizar dia no date
+        const parts = t.date.split('-');
+        parts[2] = String(Math.min(dueDay, 28)).padStart(2, '0');
+        t.date = parts.join('-');
+        t.dueDay = dueDay;
+        updated++;
+      }
+    });
+
+    showToast(`Recorrente atualizado! ${updated > 0 ? updated + ' transação(ões) pendente(s) atualizada(s)' : ''}`);
   } else {
     state.recurring.push({ id: generateId(), type, description, amount, dueDay, category, responsible, active: true, startMonth, endMonth });
     showToast('Recorrente criado!');
   }
   saveData();
   closeModal('recurring-modal');
-  renderRecurring();
+  navigateTo(state.currentPage);
 }
 
 function deleteRecurring() {
   if (!state.editingRecurring) return;
-  if (!confirm('Excluir este lançamento recorrente?')) return;
-  state.recurring = state.recurring.filter(r => r.id !== state.editingRecurring.id);
-  saveData(); closeModal('recurring-modal'); showToast('Recorrente excluído'); renderRecurring();
+  if (!confirm('Excluir este recorrente e suas transações pendentes?')) return;
+  const recId = state.editingRecurring.id;
+  state.recurring = state.recurring.filter(r => r.id !== recId);
+  // Remover transações pendentes geradas por este recorrente
+  state.transactions = state.transactions.filter(t => !(t.recurringId === recId && !t.paid));
+  saveData(); closeModal('recurring-modal'); showToast('Recorrente e transações pendentes excluídos'); navigateTo(state.currentPage);
 }
 
 // ---- GOAL MODAL ----
