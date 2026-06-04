@@ -275,13 +275,20 @@ function generateCurrentMonth() {
   }
 }
 
-// ---- RENDER: DASHBOARD ----
-function renderDashboard() {
+// ---- UPDATE HEADER VALUES ----
+function updateHeaderValues() {
+  document.getElementById('month-label').textContent = `${MONTHS[state.currentMonth]} ${state.currentYear}`;
   const { income, expense, balance } = getMonthSummary(state.currentMonth, state.currentYear);
   document.getElementById('income-value').textContent = formatCurrency(income);
   document.getElementById('expense-value').textContent = formatCurrency(expense);
-  document.getElementById('balance-value').textContent = formatCurrency(balance);
-  document.getElementById('month-label').textContent = `${MONTHS[state.currentMonth]} ${state.currentYear}`;
+  const balanceEl = document.getElementById('balance-value');
+  balanceEl.textContent = formatCurrency(balance);
+  balanceEl.style.color = balance >= 0 ? 'var(--income)' : 'var(--expense)';
+}
+
+// ---- RENDER: DASHBOARD ----
+function renderDashboard() {
+  updateHeaderValues();
 
   renderBarChart();
   renderPieChart();
@@ -587,12 +594,7 @@ function navigateTo(page) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const navBtn = document.querySelector(`.nav-item[data-page="${page}"]`);
   if (navBtn) navBtn.classList.add('active');
-  document.getElementById('month-label').textContent = `${MONTHS[state.currentMonth]} ${state.currentYear}`;
-
-  const { income, expense, balance } = getMonthSummary(state.currentMonth, state.currentYear);
-  document.getElementById('income-value').textContent = formatCurrency(income);
-  document.getElementById('expense-value').textContent = formatCurrency(expense);
-  document.getElementById('balance-value').textContent = formatCurrency(balance);
+  updateHeaderValues();
 
   if (page === 'dashboard') renderDashboard();
   else if (page === 'transactions') renderTransactions();
